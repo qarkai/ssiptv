@@ -47,13 +47,13 @@ function filesToM3U(dirContent, host, dir) {
         var url = encodeURI(`${dir}${item.name}`);
 
         if (item.isDirectory()) {
-            logo = 'https://cdn.icon-icons.com/icons2/1379/PNG/512/folderbluevideo_93150.png';
+            logo = 'video-dir.png';
             type = 'playlist';
             size = 'Medium';
             url += '.m3u';
         }
         else if (item.isFile() && isVideo(item.name)) {
-            logo = 'https://cdn.icon-icons.com/icons2/1520/PNG/512/videoplayflat_106010.png';
+            logo = 'video-file.png';
             size = 'Small';
             type = 'video';
         }
@@ -61,7 +61,7 @@ function filesToM3U(dirContent, host, dir) {
             return;
         }
 
-        s += `#EXTINF:0 tvg-logo="${logo}" type="${type}", ${item.name.replace(extension, '')}\n`;
+        s += `#EXTINF:0 tvg-logo="http://${host}/${logo}" type="${type}", ${item.name.replace(extension, '')}\n`;
         s += `#EXTSIZE: ${size}\n`;
         s += `http://${host}/${url}\n`;
     }, s);
