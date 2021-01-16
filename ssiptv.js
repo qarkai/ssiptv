@@ -43,18 +43,15 @@ function filesToM3U(dirContent, host, dir) {
     dirContent.forEach(item => {
         var logo;
         var type;
-        var size;
         var url = encodeURI(`${dir}${item.name}`);
 
         if (item.isDirectory()) {
             logo = 'video-dir.png';
             type = 'playlist';
-            size = 'Medium';
             url += '.m3u';
         }
         else if (item.isFile() && isVideo(item.name)) {
             logo = 'video-file.png';
-            size = 'Small';
             type = 'video';
         }
         else {
@@ -62,7 +59,6 @@ function filesToM3U(dirContent, host, dir) {
         }
 
         s += `#EXTINF:0 tvg-logo="http://${host}/${logo}" type="${type}", ${item.name.replace(extension, '')}\n`;
-        s += `#EXTSIZE: ${size}\n`;
         s += `http://${host}/${url}\n`;
     }, s);
 
