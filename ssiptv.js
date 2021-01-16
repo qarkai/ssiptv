@@ -49,12 +49,17 @@ function filesToM3U(dirContent, host, dir) {
             logo = 'video-dir.png';
             type = 'playlist';
             url += '.m3u';
+        } else if (item.isFile()) {
+            if (isVideo(item.name)) {
+                logo = 'video-file.png';
+                type = 'video';
+            } else if (item.name.endsWith('.m3u')) {
+                logo = 'video-dir.png';
+                type = 'playlist';
+            }
         }
-        else if (item.isFile() && isVideo(item.name)) {
-            logo = 'video-file.png';
-            type = 'video';
-        }
-        else {
+
+        if (!type) {
             return;
         }
 
@@ -67,8 +72,17 @@ function filesToM3U(dirContent, host, dir) {
 
 function m3u(r) {
     var dir = decodeURI(r.uri.slice(1, -4)); // cut / and .m3u
+    var localDir = `${r.variables.video_dir}/${dir}`;
 
-    var files = fs.readdirSync(`${r.variables.video_dir}/${dir}`, {withFileTypes: true});
+    try {
+        // check if m3u file exists and return it's contents
+        var m3uFile = `${localDir}.m3u`;
+        fs.accessSync(m3uFile, fs.constants.R_OK);
+        r.return(200, fs.readFileSync(m3uFile), 'utf8');
+        return;
+    } catch (e) {}
+
+    var files = fs.readdirSync(localDir, {withFileTypes: true});
     files.sort(compareFiles);
 
     var s = filesToM3U(files, r.headersIn.Host, dir);
