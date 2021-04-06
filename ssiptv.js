@@ -37,7 +37,36 @@ function isPlaylist(name) {
         || name.endsWith('.m3u');
 }
 
-function filesToM3U(dirContent, host, dir) {
+function getBasename(name) {
+    return name.split('.').slice(0, -1).join('.');
+}
+
+function getLogoExtension(path) {
+    var logoExtensions = ['jpeg', 'jpg', 'png'];
+    return logoExtensions.find(ext => {
+        try {
+            fs.accessSync(`${path}.${ext}`, fs.constants.R_OK);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    });
+}
+
+function getLogo(name, dir, localDir, defaultLogo) {
+    var ext = getLogoExtension(`${localDir}/${name}`);
+    return ext ? `${dir}${name}.${ext}` : defaultLogo;
+}
+
+function getPlaylistLogo(name, dir, localDir) {
+    return getLogo(name, dir, localDir, 'video-dir.png');
+}
+
+function getVideoLogo(name, dir, localDir) {
+    return getLogo(name, dir, localDir, 'video-file.png');
+}
+
+function filesToM3U(dirContent, host, dir, localDir) {
     var extension = /\.[^/.]+$/;
     var s = '#EXTM3U\n';
 
@@ -51,15 +80,15 @@ function filesToM3U(dirContent, host, dir) {
         var url = encodeURI(`${dir}${item.name}`);
 
         if (item.isDirectory()) {
-            logo = 'video-dir.png';
+            logo = getPlaylistLogo(item.name, dir, localDir);
             type = 'playlist';
             url += '.m3u';
         } else if (item.isFile()) {
             if (isPlaylist(item.name)) {
-                logo = 'video-dir.png';
+                logo = getPlaylistLogo(getBasename(item.name), dir, localDir);
                 type = 'playlist';
             } else if (isVideo(item.name)) {
-                logo = 'video-file.png';
+                logo = getVideoLogo(getBasename(item.name), dir, localDir);
                 type = 'video';
             }
         }
@@ -67,6 +96,8 @@ function filesToM3U(dirContent, host, dir) {
         if (!type) {
             return;
         }
+
+        logo = encodeURI(logo);
 
         s += `#EXTINF:0 tvg-logo="http://${host}/${logo}" type="${type}", ${item.name.replace(extension, '')}\n`;
         s += `http://${host}/${url}\n`;
@@ -90,7 +121,7 @@ function m3u(r) {
     var files = fs.readdirSync(localDir, {withFileTypes: true});
     files.sort(compareFiles);
 
-    var s = filesToM3U(files, r.headersIn.Host, dir);
+    var s = filesToM3U(files, r.headersIn.Host, dir, localDir);
     r.return(200, s);
 }
 

@@ -45,6 +45,8 @@ In SS IPTV add external playlist with url `http://ip:port/.m3u`.
 
 Where `ip` is Nginx's IP, port is from `listen <port>;` directive.
 
+If there is a picture (jpg or png) with the same basename as video or directory it will be used as logo.
+
 ### LiveProxy
 
 Script converts commands from `playlist.liveproxy` files to LiveProxy's base64 urls. Sample file (from LiveProxy docs):
