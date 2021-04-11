@@ -100,6 +100,9 @@ function filesToM3U(dirContent, host, dir, localDir) {
         logo = encodeURI(logo);
 
         s += `#EXTINF:0 tvg-logo="http://${host}/${logo}" type="${type}", ${item.name.replace(extension, '')}\n`;
+        if (type === 'playlist') {
+            s += '#EXTSIZE: Medium\n';
+        }
         s += `http://${host}/${url}\n`;
     }, s);
 
